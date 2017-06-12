@@ -1,7 +1,7 @@
 #
 # Dockerfile for nodebb
 #
-FROM mhart/alpine-node:6.11.0
+FROM node:6.11.0-alpine
 MAINTAINER kev <294786949@qq.com>
 
 ENV BB_VER 1.5.1
@@ -20,10 +20,8 @@ RUN set -ex \
                   openssl \
     && apk add -t TMP build-base \
                       curl \
-                      git \
                       krb5-dev \
                       openssl-dev \
-                      python \
                       tar \
     && curl -sSL $BB_URL | tar xz --strip 1 \
     && npm install --production \
