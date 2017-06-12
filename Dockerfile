@@ -1,27 +1,40 @@
-FROM node:5
-MAINTAINER bumped.io team <daniel.blezek@gmail.com>
+#
+# Dockerfile for nodebb
+#
 
-# Prepare answers to postfix install questions.
-RUN echo "postfix postfix/main_mailer_type select smarthost" | debconf-set-selections 
-RUN echo "postfix postfix/mailname string localhost.localdomain" | debconf-set-selections 
-RUN echo "postfix postfix/relayhost string smtp.localdomain" | debconf-set-selections
+FROM alpine
+MAINTAINER kev <noreply@easypi.pro>
 
-# Install postfix
-RUN apt-get update
-RUN apt-get install -y postfix
+ENV BB_VER 1.5.1
+ENV BB_URL https://github.com/NodeBB/NodeBB/archive/v$BB_VER.tar.gz
+ENV BB_SOURCE /usr/src/nodebb
+ENV BB_CONTENT /var/lib/nodebb
 
-# Install nodebb
-RUN cd /opt ; git clone -b v1.0.0 https://github.com/NodeBB/NodeBB nodebb
-RUN cd /opt/nodebb ; npm install
+WORKDIR $BB_SOURCE
+VOLUME $BB_CONTENT
 
-# Create a nodebb volume
-VOLUME /opt/nodebb
+RUN set -ex \
+    && apk add -U bash \
+                  imagemagick \
+                  krb5-libs \
+                  nodejs \
+                  openssl \
+    && apk add -t TMP build-base \
+                      curl \
+                      git \
+                      krb5-dev \
+                      openssl-dev \
+                      python \
+                      tar \
+    && curl -sSL $BB_URL | tar xz --strip 1 \
+    && npm install --production \
+    && npm cache clean \
+    && apk del TMP \
+    && rm -rf /tmp/npm* \
+              /var/cache/apk/*
 
-# Define a working directory, and entrypoint
-WORKDIR /opt/nodebb
-COPY entrypoint.sh /opt/nodebb/entrypoint.sh
+COPY docker-entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
-# Expose the default nodbb port
 EXPOSE 4567
-
-CMD ["/opt/nodebb/entrypoint.sh"]
+CMD ["npm", "start"]
