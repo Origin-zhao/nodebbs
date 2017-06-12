@@ -1,9 +1,8 @@
 #
 # Dockerfile for nodebb
 #
-
-FROM alpine
-MAINTAINER kev <noreply@easypi.pro>
+FROM mhart/alpine-node:6.11.0
+MAINTAINER kev <294786949@qq.com>
 
 ENV BB_VER 1.5.1
 ENV BB_URL https://github.com/NodeBB/NodeBB/archive/v$BB_VER.tar.gz
@@ -17,7 +16,7 @@ RUN set -ex \
     && apk add -U bash \
                   imagemagick \
                   krb5-libs \
-                  nodejs \
+                  git \
                   openssl \
     && apk add -t TMP build-base \
                       curl \
